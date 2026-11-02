@@ -1,0 +1,15 @@
+diff --git a/src/Magento/FunctionalTestingFramework/Util/ModuleResolver/ModuleResolverService.php b/src/Magento/FunctionalTestingFramework/Util/ModuleResolver/ModuleResolverService.php
+index 16d3e7d..f00c46a 100644
+--- a/src/Magento/FunctionalTestingFramework/Util/ModuleResolver/ModuleResolverService.php
++++ b/src/Magento/FunctionalTestingFramework/Util/ModuleResolver/ModuleResolverService.php
+@@ -301,7 +301,9 @@ class ModuleResolverService
+      */
+     private function findVendorNameFromPath(string $path): string
+     {
+-        $possibleVendorName = 'UnknownVendor';
++        // Changed by MFTF Studio on 2026-11-02: a module outside vendor, app/code and
++        // dev/tests is named by the folder it sits in rather than UnknownVendor.
++        $possibleVendorName = ucfirst(basename(dirname($path)));
+         $dirPaths = [
+             ModuleResolver::VENDOR,
+             ModuleResolver::APP_CODE,
