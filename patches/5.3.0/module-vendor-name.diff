@@ -1,15 +1,36 @@
+diff --git a/src/Magento/FunctionalTestingFramework/Util/ModuleResolver.php b/src/Magento/FunctionalTestingFramework/Util/ModuleResolver.php
+index dd45efb..08e2bea 100644
+--- a/src/Magento/FunctionalTestingFramework/Util/ModuleResolver.php
++++ b/src/Magento/FunctionalTestingFramework/Util/ModuleResolver.php
+@@ -612,7 +612,12 @@ class ModuleResolver
+      */
+     private function findVendorNameFromPath($path)
+     {
+-        $possibleVendorName = 'UnknownVendor';
++        // Changed by MFTF Studio on 2026-11-02: a module outside vendor, app/code and
++        // dev/tests is named by the folder it sits in rather than UnknownVendor.
++        $parent = basename(dirname($path));
++        $possibleVendorName = in_array($parent, ['', '.', DIRECTORY_SEPARATOR], true)
++            ? 'UnknownVendor'
++            : ucfirst($parent);
+         $dirPaths = [
+             self::VENDOR,
+             self::APP_CODE,
 diff --git a/src/Magento/FunctionalTestingFramework/Util/ModuleResolver/ModuleResolverService.php b/src/Magento/FunctionalTestingFramework/Util/ModuleResolver/ModuleResolverService.php
-index 634f9be..edf1e1c 100644
+index 634f9be..0a61a51 100644
 --- a/src/Magento/FunctionalTestingFramework/Util/ModuleResolver/ModuleResolverService.php
 +++ b/src/Magento/FunctionalTestingFramework/Util/ModuleResolver/ModuleResolverService.php
-@@ -302,7 +302,9 @@ class ModuleResolverService
+@@ -302,7 +302,12 @@ class ModuleResolverService
       */
      private function findVendorNameFromPath(string $path): string
      {
 -        $possibleVendorName = 'UnknownVendor';
 +        // Changed by MFTF Studio on 2026-11-02: a module outside vendor, app/code and
 +        // dev/tests is named by the folder it sits in rather than UnknownVendor.
-+        $possibleVendorName = ucfirst(basename(dirname($path)));
++        $parent = basename(dirname($path));
++        $possibleVendorName = in_array($parent, ['', '.', DIRECTORY_SEPARATOR], true)
++            ? 'UnknownVendor'
++            : ucfirst($parent);
          $dirPaths = [
              ModuleResolver::VENDOR,
              ModuleResolver::APP_CODE,
