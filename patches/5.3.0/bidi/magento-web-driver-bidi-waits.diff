@@ -1,0 +1,103 @@
+diff --git a/src/Magento/FunctionalTestingFramework/Module/MagentoWebDriver.php b/src/Magento/FunctionalTestingFramework/Module/MagentoWebDriver.php
+index e5b1c70..3b833ba 100644
+--- a/src/Magento/FunctionalTestingFramework/Module/MagentoWebDriver.php
++++ b/src/Magento/FunctionalTestingFramework/Module/MagentoWebDriver.php
+@@ -1,4 +1,8 @@
+ <?php
++/**
++ * Changed by MFTF Studio on 2026-11-02: waits on WebDriver BiDi where the
++ * WebDriver BiDi module is enabled and the browser session has it.
++ */
+ /**
+  * Copyright 2017 Adobe
+  * All Rights Reserved.
+@@ -402,6 +406,16 @@ class MagentoWebDriver extends WebDriver
+     {
+         $timeout = $timeout ?? $this->_getConfig()['pageload_timeout'];
+ 
++        $bidi = $this->webDriverBiDi();
++        if ($bidi !== null) {
++            try {
++                $bidi->waitForPageReady($timeout);
++            } catch (\Facebook\WebDriver\Exception\TimeoutException $exception) {
++                $this->debug("page still busy after {$timeout} seconds, carrying on");
++            }
++            return;
++        }
++
+         try {
+             $this->waitForJS('return !!window.jQuery && window.jQuery.active == 0;', $timeout);
+         } catch (\Exception $exceptione) {
+@@ -422,11 +436,28 @@ class MagentoWebDriver extends WebDriver
+     {
+         $timeout = $timeout ?? $this->_getConfig()['pageload_timeout'];
+ 
+-        $this->waitForJS('return document.readyState == "complete"', $timeout);
++        if ($this->webDriverBiDi() === null) {
++            $this->waitForJS('return document.readyState == "complete"', $timeout);
++        }
+         $this->waitForAjaxLoad($timeout);
+         $this->waitForLoadingMaskToDisappear($timeout);
+     }
+ 
++    /**
++     * The WebDriver BiDi module enabled after this one, while the browser session has BiDi.
++     *
++     * @return \Rnscommerce\Codeception\WebDriverBiDi\WebDriverBiDi|null
++     */
++    private function webDriverBiDi()
++    {
++        foreach ($this->getModules() as $module) {
++            if ($module instanceof \Rnscommerce\Codeception\WebDriverBiDi\WebDriverBiDi) {
++                return $module->_hasBiDi() ? $module : null;
++            }
++        }
++        return null;
++    }
++
+     /**
+      * Wait for all visible loading masks to disappear. Gets all elements by mask selector, then loops over them.
+      *
+@@ -437,6 +468,7 @@ class MagentoWebDriver extends WebDriver
+     public function waitForLoadingMaskToDisappear($timeout = null)
+     {
+         $timeout = $timeout ?? $this->_getConfig()['pageload_timeout'];
++        $waits = $this->webDriverBiDi() ?? $this;
+ 
+         foreach ($this->loadingMasksLocators as $maskLocator) {
+             // Get count of elements found for looping.
+@@ -445,7 +477,7 @@ class MagentoWebDriver extends WebDriver
+             for ($i = 1; $i <= count($loadingMaskElements); $i++) {
+                 // Formatting and looping on i as we can't interact elements returned above
+                 // eg.  (//div[@data-role="spinner"])[1]
+-                $this->waitForElementNotVisible("({$maskLocator})[{$i}]", $timeout);
++                $waits->waitForElementNotVisible("({$maskLocator})[{$i}]", $timeout);
+             }
+         }
+     }
+@@ -671,6 +703,16 @@ class MagentoWebDriver extends WebDriver
+      */
+     public function conditionalClick($selector, $dependentSelector, $visible)
+     {
++        $bidi = $this->webDriverBiDi();
++        if ($bidi !== null) {
++            $timeout = $this->_getConfig()['pageload_timeout'];
++            try {
++                $bidi->waitForPageReady($timeout);
++            } catch (\Facebook\WebDriver\Exception\TimeoutException $exception) {
++                $this->debug("page still busy after {$timeout} seconds, carrying on");
++            }
++        }
++
+         $el = $this->_findElements($dependentSelector);
+         if (sizeof($el) > 1) {
+             throw new \Exception("more than one element matches selector " . $dependentSelector);
+@@ -684,6 +726,8 @@ class MagentoWebDriver extends WebDriver
+         }
+ 
+         if ($clickCondition) {
++            // The click is a method call rather than a step, so the module's own _beforeStep never checks it.
++            $bidi?->_waitUntilActionable('click', [$selector]);
+             $this->click($selector);
+         }
+     }
