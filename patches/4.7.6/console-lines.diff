@@ -1,0 +1,22 @@
+diff --git a/src/Magento/FunctionalTestingFramework/Codeception/Subscriber/Console.php b/src/Magento/FunctionalTestingFramework/Codeception/Subscriber/Console.php
+index fc80483..fd407de 100644
+--- a/src/Magento/FunctionalTestingFramework/Codeception/Subscriber/Console.php
++++ b/src/Magento/FunctionalTestingFramework/Codeception/Subscriber/Console.php
+@@ -1,4 +1,8 @@
+ <?php
++/**
++ * Changed by MFTF Studio on 2026-11-02: a generated test's lines are split at
++ * every line break, so each step is found on Windows too.
++ */
+ /**
+  * Copyright © Magento, Inc. All rights reserved.
+  * See COPYING.txt for license details.
+@@ -233,7 +237,7 @@ class Console extends \Codeception\Subscriber\Console
+         $stepLine = $stepLine - 1;
+ 
+         if (!array_key_exists($filePath, $this->testFiles)) {
+-            $this->testFiles[$filePath] = explode(PHP_EOL, file_get_contents($filePath));
++            $this->testFiles[$filePath] = preg_split('/\R/', file_get_contents($filePath));
+         }
+ 
+         preg_match(TestGenerator::ACTION_STEP_KEY_REGEX, $this->testFiles[$filePath][$stepLine], $matches);

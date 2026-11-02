@@ -1,0 +1,36 @@
+name: Build
+
+# Publishes each version whose build in builds.json has no release yet.
+on:
+  push:
+    branches: [main]
+    paths:
+      - builds.json
+      - build.mjs
+      - patches/**
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build
+
+jobs:
+  build:
+    # GitHub's own runner: it has the PHP and Composer a build needs.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Build and publish
+        run: node build.mjs --publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Composer reads the BiDi module's repositories through GitHub's API,
+          # which refuses an anonymous runner once its address is used up.
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'

@@ -1,0 +1,16 @@
+diff --git a/dev/tests/functional/standalone_bootstrap.php b/dev/tests/functional/standalone_bootstrap.php
+index 192bf35..ebb0d8e 100755
+--- a/dev/tests/functional/standalone_bootstrap.php
++++ b/dev/tests/functional/standalone_bootstrap.php
+@@ -13,7 +13,10 @@ if (strpos($rootFile, "phpunit") !== false) {
+ 
+ defined('PROJECT_ROOT') || define('PROJECT_ROOT', dirname(dirname(dirname(__DIR__))));
+ 
+-require_once realpath(PROJECT_ROOT . '/vendor/autoload.php');
++// Changed by MFTF Studio on 2026-11-02: a project with no vendor tree of its own keeps its own loader.
++if (is_file(PROJECT_ROOT . '/vendor/autoload.php')) {
++    require_once PROJECT_ROOT . '/vendor/autoload.php';
++}
+ 
+ $envFilePath = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR;
+ defined('ENV_FILE_PATH') || define('ENV_FILE_PATH', $envFilePath);
