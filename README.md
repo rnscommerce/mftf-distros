@@ -28,6 +28,9 @@ Each build starts from Adobe's own tag of that version, and then:
     break, so each step is named on Windows too.
   - `absent-project-autoloader.diff`: the standalone bootstrap loads a
     project's `vendor/autoload.php` only where there is one.
+  - `module-vendor-name.diff`: a module outside `vendor`, `app/code` and
+    `dev/tests` is named after the folder it sits in, as `Acme_Own` for
+    `Acme/Own`, rather than `UnknownVendor_Own`.
 - MFTF's own documentation and its own tests are left out, as are the AWS
   SDK's models for every service but Secrets Manager and STS.
 
