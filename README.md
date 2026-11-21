@@ -31,6 +31,9 @@ Each build starts from Adobe's own tag of that version, and then:
   - `module-vendor-name.diff`: a module outside `vendor`, `app/code` and
     `dev/tests` is named after the folder it sits in, as `Acme_Own` for
     `Acme/Own`, rather than `UnknownVendor_Own`.
+  - `step-failure.diff`: a failing step keeps the throwable it threw, which
+    Codeception's `Step` returns from `getFailure()`, so a listener after the
+    step can read why it failed.
 - MFTF's own documentation and its own tests are left out, as are the AWS
   SDK's models for every service but Secrets Manager and STS.
 

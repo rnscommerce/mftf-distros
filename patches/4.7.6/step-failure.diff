@@ -1,0 +1,36 @@
+diff --git a/vendor/codeception/codeception/src/Codeception/Step.php b/vendor/codeception/codeception/src/Codeception/Step.php
+index fa28ceb..4885778 100644
+--- a/vendor/codeception/codeception/src/Codeception/Step.php
++++ b/vendor/codeception/codeception/src/Codeception/Step.php
+@@ -1,3 +1,7 @@
+ <?php
++/**
++ * Changed by MFTF Studio on 2026-11-21: a failing step keeps the throwable it
++ * threw, so a listener at STEP_AFTER can read why the step failed.
++ */
+ 
+ declare(strict_types=1);
+@@ -40,4 +44,6 @@ abstract class Step implements Stringable
+     protected bool $failed = false;
+ 
++    protected ?\Throwable $failure = null;
++
+     protected bool $isTry = false;
+ 
+@@ -102,4 +108,10 @@ abstract class Step implements Stringable
+     }
+ 
++    /** The throwable the step threw, if it failed. */
++    public function getFailure(): ?\Throwable
++    {
++        return $this->failure;
++    }
++
+     public function getArguments(): array
+     {
+@@ -296,4 +308,5 @@ abstract class Step implements Stringable
+             }
+             $this->failed = true;
++            $this->failure = $e;
+             $this->getMetaStep()?->setFailed(true);
+             throw $e;
